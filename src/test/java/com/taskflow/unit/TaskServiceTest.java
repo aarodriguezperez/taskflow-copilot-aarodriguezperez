@@ -202,8 +202,8 @@ class TaskServiceTest {
             // 2) id=2: con responsable
             Task b = tareaConFecha(2L, "TareaB", TaskStatus.TODO, LocalDate.now().plusDays(5));
             b.setAssigneeId(1L);
-            // 3) id=3: sin responsable, dueDate = null
-            Task c = tarea(3L, "TareaC", null);
+            // 3) id=3: sin responsable, DONE, dueDate = null
+            Task c = tareaConStatus(3L, "TareaC", TaskStatus.DONE, null);
             // 4) id=4: sin responsable, dueDate = now()+2
             Task d = tareaConFecha(4L, "TareaD", TaskStatus.TODO, LocalDate.now().plusDays(2));
             d.setAssigneeId(null);
@@ -240,6 +240,14 @@ class TaskServiceTest {
     private Task tareaConFecha(Long id, String title, TaskStatus status, LocalDate fecha) {
         try {
             return new Task(id, title, "desc", status, Priority.MED, PROYECTO, 1L, fecha);
+        } catch (TaskValidationException e) {
+            throw new IllegalStateException("dato de prueba inválido", e);
+        }
+    }
+
+    private Task tareaConStatus(Long id, String title, TaskStatus status, Long assigneeId) {
+        try {
+            return new Task(id, title, "desc", status, Priority.MED, PROYECTO, assigneeId, null);
         } catch (TaskValidationException e) {
             throw new IllegalStateException("dato de prueba inválido", e);
         }
