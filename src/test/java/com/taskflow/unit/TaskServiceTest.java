@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -157,10 +159,44 @@ class TaskServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("vencidas")
+    class Vencidas {
+
+        @Test
+        void vencidas_devuelveSoloVencidasYOrdenadas() {
+            // t1: vencida hace 2 días, IN_PROGRESS -> debe aparecer (más antigua)
+            Task t1 = tareaConFecha(1L, "Antigua", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(2));
+            // t2: vencida hace 3 días pero está DONE -> NO aparece
+            Task t2 = tareaConFecha(2L, "Hecha", TaskStatus.DONE, LocalDate.now().minusDays(3));
+            // t3: sin dueDate -> NO aparece
+            Task t3 = tarea(3L, "Sin fecha", null);
+            // t4: vencida ayer, IN_PROGRESS -> aparece (más reciente)
+            Task t4 = tareaConFecha(4L, "Reciente", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(1));
+
+            when(repository.findAll()).thenReturn(List.of(t1, t2, t3, t4));
+
+            List<Task> res = service.vencidas();
+
+            assertEquals(2, res.size());
+            // Orden por dueDate asc: t1 (minus2) primero, luego t4 (minus1)
+            assertEquals(1L, res.get(0).getId());
+            assertEquals(4L, res.get(1).getId());
+        }
+    }
+
     /** Fabrica una Task de rehidratación REAL (dato, no mock). assigneeId null = sin responsable. */
     private Task tarea(Long id, String title, Long assigneeId) {
         try {
             return new Task(id, title, "desc", TaskStatus.TODO, Priority.MED, PROYECTO, assigneeId, null);
+        } catch (TaskValidationException e) {
+            throw new IllegalStateException("dato de prueba inválido", e);
+        }
+    }
+
+    private Task tareaConFecha(Long id, String title, TaskStatus status, LocalDate fecha) {
+        try {
+            return new Task(id, title, "desc", status, Priority.MED, PROYECTO, 1L, fecha);
         } catch (TaskValidationException e) {
             throw new IllegalStateException("dato de prueba inválido", e);
         }
