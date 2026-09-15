@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -157,10 +159,95 @@ class TaskServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("vencidas")
+    class Vencidas {
+
+        @Test
+        void vencidas_devuelveSoloVencidasYOrdenadas() {
+            // El repositorio devuelve en este orden:
+            // 1) vencida hace 1 día (id=1, IN_PROGRESS)
+            Task t1 = tareaConFecha(1L, "Hace1", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(1));
+            // 2) fecha en 3 días (id=2, IN_PROGRESS)
+            Task t2 = tareaConFecha(2L, "Futura", TaskStatus.IN_PROGRESS, LocalDate.now().plusDays(3));
+            // 3) DONE vencida hace 10 días (id=3)
+            Task t3 = tareaConFecha(3L, "HechaAntigua", TaskStatus.DONE, LocalDate.now().minusDays(10));
+            // 4) sin dueDate (id=4)
+            Task t4 = tarea(4L, "SinFecha", null);
+            // 5) vencida hace 5 días (id=5, IN_PROGRESS)
+            Task t5 = tareaConFecha(5L, "Hace5", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(5));
+
+            when(repository.findAll()).thenReturn(List.of(t1, t2, t3, t4, t5));
+
+            List<Task> res = service.vencidas();
+
+            assertEquals(2, res.size());
+            // Debe devolver solo las vencidas no-DONE, ordenadas por dueDate asc (más antigua primero):
+            // primero id=5 (hace 5 días), luego id=1 (hace 1 día)
+            assertEquals(5L, res.get(0).getId());
+            assertEquals(1L, res.get(1).getId());
+        }
+    }
+
+    @Nested
+    @DisplayName("SinResponsable")
+    class SinResponsable {
+
+        @Test
+        void sinResponsable_devuelveSoloLosTresEnOrden() {
+            // El repositorio devuelve, en este orden:
+            // 1) id=1: sin responsable, dueDate = now()+10
+            Task a = tareaConFecha(1L, "TareaA", TaskStatus.TODO, LocalDate.now().plusDays(10));
+            a.setAssigneeId(null);
+            // 2) id=2: con responsable
+            Task b = tareaConFecha(2L, "TareaB", TaskStatus.TODO, LocalDate.now().plusDays(5));
+            b.setAssigneeId(1L);
+            // 3) id=3: sin responsable, DONE, dueDate = null
+            Task c = tareaConStatus(3L, "TareaC", TaskStatus.DONE, null);
+            // 4) id=4: sin responsable, dueDate = now()+2
+            Task d = tareaConFecha(4L, "TareaD", TaskStatus.TODO, LocalDate.now().plusDays(2));
+            d.setAssigneeId(null);
+
+            when(repository.findAll()).thenReturn(List.of(a, b, c, d));
+
+            List<Task> res = service.sinResponsable();
+
+            // Debe devolver exactamente las tres sin responsable, ordenadas por dueDate asc: 4,1,3
+            assertEquals(List.of(4L, 1L, 3L), res.stream().map(Task::getId).toList());
+        }
+
+        @Test
+        void sinResponsable_soloConResponsable_devuelveVacio() {
+            Task t1 = tareaConFecha(10L, "TareaX", TaskStatus.TODO, LocalDate.now().plusDays(1));
+            t1.setAssigneeId(99L);
+            when(repository.findAll()).thenReturn(List.of(t1));
+
+            List<Task> res = service.sinResponsable();
+
+            assertEquals(0, res.size());
+        }
+    }
+
     /** Fabrica una Task de rehidratación REAL (dato, no mock). assigneeId null = sin responsable. */
     private Task tarea(Long id, String title, Long assigneeId) {
         try {
             return new Task(id, title, "desc", TaskStatus.TODO, Priority.MED, PROYECTO, assigneeId, null);
+        } catch (TaskValidationException e) {
+            throw new IllegalStateException("dato de prueba inválido", e);
+        }
+    }
+
+    private Task tareaConFecha(Long id, String title, TaskStatus status, LocalDate fecha) {
+        try {
+            return new Task(id, title, "desc", status, Priority.MED, PROYECTO, 1L, fecha);
+        } catch (TaskValidationException e) {
+            throw new IllegalStateException("dato de prueba inválido", e);
+        }
+    }
+
+    private Task tareaConStatus(Long id, String title, TaskStatus status, Long assigneeId) {
+        try {
+            return new Task(id, title, "desc", status, Priority.MED, PROYECTO, assigneeId, null);
         } catch (TaskValidationException e) {
             throw new IllegalStateException("dato de prueba inválido", e);
         }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -86,6 +87,32 @@ class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].title").value("Primera"));
+    }
+
+    @Test
+    void getOverdue_retorna200YListaEnOrden() throws Exception {
+        when(taskService.vencidas()).thenReturn(List.of(
+                tarea(7L, "Corregir bug de fechas", TaskStatus.IN_PROGRESS),
+                tarea(9L, "Otra vencida", TaskStatus.IN_PROGRESS)));
+
+        mockMvc.perform(get("/tasks/overdue"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].title").value("Corregir bug de fechas"));
+    }
+
+    @Test
+    void getUnassigned_retorna200YConIdYAssigneeNull() throws Exception {
+        Task t1 = tareaCon(4L, "Escribir tests MockMvc", TaskStatus.TODO, 1L);
+        t1.setAssigneeId(null);
+
+        when(taskService.sinResponsable()).thenReturn(List.of(t1));
+
+        mockMvc.perform(get("/tasks/unassigned"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(4))
+                .andExpect(jsonPath("$[0].assigneeId").value(nullValue()));
     }
 
     @Test
