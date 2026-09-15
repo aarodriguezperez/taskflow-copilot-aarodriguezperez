@@ -189,6 +189,45 @@ class TaskServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("SinResponsable")
+    class SinResponsable {
+
+        @Test
+        void sinResponsable_devuelveSoloLosTresEnOrden() {
+            // El repositorio devuelve, en este orden:
+            // 1) id=1: sin responsable, dueDate = now()+10
+            Task a = tareaConFecha(1L, "TareaA", TaskStatus.TODO, LocalDate.now().plusDays(10));
+            a.setAssigneeId(null);
+            // 2) id=2: con responsable
+            Task b = tareaConFecha(2L, "TareaB", TaskStatus.TODO, LocalDate.now().plusDays(5));
+            b.setAssigneeId(1L);
+            // 3) id=3: sin responsable, dueDate = null
+            Task c = tarea(3L, "TareaC", null);
+            // 4) id=4: sin responsable, dueDate = now()+2
+            Task d = tareaConFecha(4L, "TareaD", TaskStatus.TODO, LocalDate.now().plusDays(2));
+            d.setAssigneeId(null);
+
+            when(repository.findAll()).thenReturn(List.of(a, b, c, d));
+
+            List<Task> res = service.sinResponsable();
+
+            // Debe devolver exactamente las tres sin responsable, ordenadas por dueDate asc: 4,1,3
+            assertEquals(List.of(4L, 1L, 3L), res.stream().map(Task::getId).toList());
+        }
+
+        @Test
+        void sinResponsable_soloConResponsable_devuelveVacio() {
+            Task t1 = tareaConFecha(10L, "TareaX", TaskStatus.TODO, LocalDate.now().plusDays(1));
+            t1.setAssigneeId(99L);
+            when(repository.findAll()).thenReturn(List.of(t1));
+
+            List<Task> res = service.sinResponsable();
+
+            assertEquals(0, res.size());
+        }
+    }
+
     /** Fabrica una Task de rehidratación REAL (dato, no mock). assigneeId null = sin responsable. */
     private Task tarea(Long id, String title, Long assigneeId) {
         try {

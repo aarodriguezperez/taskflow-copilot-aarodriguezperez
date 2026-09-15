@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -98,6 +99,23 @@ class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].title").value("Corregir bug de fechas"));
+    }
+
+    @Test
+    void getUnassigned_retorna200YJsonConIdYAssigneeNull() throws Exception {
+        Task t1 = tareaCon(4L, "Escribir tests MockMvc", TaskStatus.TODO, 1L);
+        t1.setAssigneeId(null);
+        Task t2 = tareaCon(6L, "Publicar en la tienda", TaskStatus.TODO, 1L);
+        t2.setAssigneeId(null);
+
+        when(taskService.sinResponsable()).thenReturn(List.of(t1, t2));
+
+        mockMvc.perform(get("/tasks/unassigned"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].id").value(org.hamcrest.Matchers.containsInAnyOrder(4, 6)))
+                .andExpect(jsonPath("$[0].assigneeId").value(nullValue()))
+                .andExpect(jsonPath("$[1].assigneeId").value(nullValue()));
     }
 
     @Test
