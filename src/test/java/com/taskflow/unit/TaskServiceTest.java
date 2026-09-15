@@ -165,23 +165,27 @@ class TaskServiceTest {
 
         @Test
         void vencidas_devuelveSoloVencidasYOrdenadas() {
-            // t1: vencida hace 2 días, IN_PROGRESS -> debe aparecer (más antigua)
-            Task t1 = tareaConFecha(1L, "Antigua", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(2));
-            // t2: vencida hace 3 días pero está DONE -> NO aparece
-            Task t2 = tareaConFecha(2L, "Hecha", TaskStatus.DONE, LocalDate.now().minusDays(3));
-            // t3: sin dueDate -> NO aparece
-            Task t3 = tarea(3L, "Sin fecha", null);
-            // t4: vencida ayer, IN_PROGRESS -> aparece (más reciente)
-            Task t4 = tareaConFecha(4L, "Reciente", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(1));
+            // El repositorio devuelve en este orden:
+            // 1) vencida hace 1 día (id=1, IN_PROGRESS)
+            Task t1 = tareaConFecha(1L, "Hace1", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(1));
+            // 2) fecha en 3 días (id=2, IN_PROGRESS)
+            Task t2 = tareaConFecha(2L, "Futura", TaskStatus.IN_PROGRESS, LocalDate.now().plusDays(3));
+            // 3) DONE vencida hace 10 días (id=3)
+            Task t3 = tareaConFecha(3L, "HechaAntigua", TaskStatus.DONE, LocalDate.now().minusDays(10));
+            // 4) sin dueDate (id=4)
+            Task t4 = tarea(4L, "SinFecha", null);
+            // 5) vencida hace 5 días (id=5, IN_PROGRESS)
+            Task t5 = tareaConFecha(5L, "Hace5", TaskStatus.IN_PROGRESS, LocalDate.now().minusDays(5));
 
-            when(repository.findAll()).thenReturn(List.of(t1, t2, t3, t4));
+            when(repository.findAll()).thenReturn(List.of(t1, t2, t3, t4, t5));
 
             List<Task> res = service.vencidas();
 
             assertEquals(2, res.size());
-            // Orden por dueDate asc: t1 (minus2) primero, luego t4 (minus1)
-            assertEquals(1L, res.get(0).getId());
-            assertEquals(4L, res.get(1).getId());
+            // Debe devolver solo las vencidas no-DONE, ordenadas por dueDate asc (más antigua primero):
+            // primero id=5 (hace 5 días), luego id=1 (hace 1 día)
+            assertEquals(5L, res.get(0).getId());
+            assertEquals(1L, res.get(1).getId());
         }
     }
 
