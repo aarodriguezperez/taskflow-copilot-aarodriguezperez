@@ -1,0 +1,5 @@
+Plan       ■■■■■■■■■■■■■■■■■■■■ 5% used • resets in 15 days
+           81 / 1,500 AIC
+--- al empezar el dia (MP-2) ---
+Plan       ■■■■■■■■■■■■■■■■■■■■ 1% used
+           29 / 1,500 AIC
