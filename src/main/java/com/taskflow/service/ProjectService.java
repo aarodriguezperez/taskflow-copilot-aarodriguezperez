@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import com.taskflow.dto.ProjectSummaryResponse;
+import com.taskflow.mapper.ProjectMapper;
 
 /**
  * ProjectService — la capa de negocio del lado Project. Cero HTTP aquí (el "no existe" se traduce con
@@ -100,5 +103,24 @@ public class ProjectService {
                 .orElseThrow(() -> new ProjectNotFoundException(id));
         tareasDe(id).forEach(t -> taskRepository.deleteById(t.getId()));   // cascada manual (la FK obliga el orden)
         projectRepository.deleteById(id);
+    }
+
+    /**
+     * Resumen de un proyecto: cuántas tareas por estado y cuántas están vencidas.
+     * Reutiliza Task.estaVencida() para el conteo de vencidas.
+     */
+    public ProjectSummaryResponse resumen(Project proyecto) {
+        List<Task> tareas = taskRepository.findByProjectId(proyecto.getId());
+        long total = tareas.size();
+        long todo = tareas.stream().filter(t -> t.getStatus() == com.taskflow.model.TaskStatus.TODO).count();
+        long inProgress = tareas.stream().filter(t -> t.getStatus() == com.taskflow.model.TaskStatus.IN_PROGRESS).count();
+        long done = tareas.stream().filter(t -> t.getStatus() == com.taskflow.model.TaskStatus.DONE).count();
+        long overdue = tareas.stream().filter(Task::estaVencida).count();
+        Map<String, Long> byStatus = Map.of(
+                "TODO", todo,
+                "IN_PROGRESS", inProgress,
+                "DONE", done
+        );
+        return ProjectMapper.aSummary(proyecto.getId(), proyecto.getName(), total, byStatus, overdue);
     }
 }
