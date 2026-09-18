@@ -1,13 +1,12 @@
 diff --git a/src/main/java/com/taskflow/controller/ReportController.java b/src/main/java/com/taskflow/controller/ReportController.java
 new file mode 100644
-index 0000000..f634286
+index 0000000..8fbfde1
 --- /dev/null
 +++ b/src/main/java/com/taskflow/controller/ReportController.java
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,34 @@
 +package com.taskflow.controller;
 +
 +import com.taskflow.dto.ProjectProgressResponse;
-+import com.taskflow.model.Project;
 +import com.taskflow.service.ProjectService;
 +import io.swagger.v3.oas.annotations.Operation;
 +import io.swagger.v3.oas.annotations.tags.Tag;
@@ -118,10 +117,10 @@ index d6b901b..67ecc17 100644
  }
 diff --git a/src/test/java/com/taskflow/slice/ProgresoProyectosControllerTest.java b/src/test/java/com/taskflow/slice/ProgresoProyectosControllerTest.java
 new file mode 100644
-index 0000000..708099a
+index 0000000..6fe82b0
 --- /dev/null
 +++ b/src/test/java/com/taskflow/slice/ProgresoProyectosControllerTest.java
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,54 @@
 +package com.taskflow.slice;
 +
 +import com.taskflow.controller.ReportController;
@@ -165,8 +164,15 @@ index 0000000..708099a
 +        mockMvc.perform(get("/reports/progress"))
 +                .andExpect(status().isOk())
 +                .andExpect(jsonPath("$[0].projectId").value(1))
++                .andExpect(jsonPath("$[0].projectName").value("Plataforma TaskFlow"))
++                .andExpect(jsonPath("$[0].totalTasks").value(5))
++                .andExpect(jsonPath("$[0].doneTasks").value(1))
 +                .andExpect(jsonPath("$[0].percentDone").value(20.0))
-+                .andExpect(jsonPath("$[1].totalTasks").value(3));
++                .andExpect(jsonPath("$[1].projectId").value(2))
++                .andExpect(jsonPath("$[1].projectName").value("App Móvil"))
++                .andExpect(jsonPath("$[1].totalTasks").value(3))
++                .andExpect(jsonPath("$[1].doneTasks").value(1))
++                .andExpect(jsonPath("$[1].percentDone").value(33.3));
 +    }
 +}
 diff --git a/src/test/java/com/taskflow/unit/ProgresoProyectosServiceTest.java b/src/test/java/com/taskflow/unit/ProgresoProyectosServiceTest.java

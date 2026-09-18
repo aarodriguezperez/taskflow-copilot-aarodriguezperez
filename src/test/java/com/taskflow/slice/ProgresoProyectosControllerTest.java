@@ -41,7 +41,14 @@ class ProgresoProyectosControllerTest {
         mockMvc.perform(get("/reports/progress"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].projectId").value(1))
+                .andExpect(jsonPath("$[0].projectName").value("Plataforma TaskFlow"))
+                .andExpect(jsonPath("$[0].totalTasks").value(5))
+                .andExpect(jsonPath("$[0].doneTasks").value(1))
                 .andExpect(jsonPath("$[0].percentDone").value(20.0))
-                .andExpect(jsonPath("$[1].totalTasks").value(3));
+                .andExpect(jsonPath("$[1].projectId").value(2))
+                .andExpect(jsonPath("$[1].projectName").value("App Móvil"))
+                .andExpect(jsonPath("$[1].totalTasks").value(3))
+                .andExpect(jsonPath("$[1].doneTasks").value(1))
+                .andExpect(jsonPath("$[1].percentDone").value(33.3));
     }
 }

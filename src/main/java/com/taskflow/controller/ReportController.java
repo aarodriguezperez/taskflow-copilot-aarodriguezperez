@@ -1,7 +1,6 @@
 package com.taskflow.controller;
 
 import com.taskflow.dto.ProjectProgressResponse;
-import com.taskflow.model.Project;
 import com.taskflow.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
