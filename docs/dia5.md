@@ -743,35 +743,6 @@ sesion-implementacion.md
 
 ---
 
-# Resultados del Día 05
-
-Al finalizar se logró:
-
-- utilizar GitHub Copilot desde VS Code con el mismo repositorio de toda la semana;
-- probar autocompletado en línea y restaurar el cambio posteriormente;
-- utilizar los modos Ask y Agent;
-- comprobar respuestas del chat mediante búsquedas independientes;
-- aprobar manualmente una ejecución de Maven;
-- reutilizar desde VS Code las instrucciones, skills y agentes almacenados en `.github/`;
-- demostrar nuevamente que el agente `revisor` no puede editar;
-- configurar tres servidores mediante `.vscode/mcp.json`;
-- comprobar sin modelo que `taskflow`, `playwright` y `aws-knowledge` respondieran;
-- utilizar `listar_tareas_vencidas` desde VS Code y contrastar su salida contra REST;
-- elegir `progress` como feature del proyecto final;
-- implementar `GET /reports/progress` mediante `crear-endpoint-taskflow`;
-- terminar PF-2 con **2.99 AI Credits**;
-- obtener `Veredicto: APROBADO` en PF-3 con **2.47 AI Credits**;
-- saltar PF-4 sin consumo adicional;
-- obtener **12/12 OK** en la verificación REST;
-- revisar individualmente los comentarios de Copilot Code Review;
-- descartar una recomendación que implicaba modificar un test preexistente;
-- corregir dos comentarios válidos con **1.99 AI Credits**;
-- terminar con **79 tests en verde**;
-- mergear el PR `#5`;
-- completar y publicar `semana6/README.md` sin placeholders pendientes.
-
----
-
 # Conclusión
 
 El Día 05 permitió comprobar que el trabajo construido durante toda la semana no estaba limitado a la CLI.
