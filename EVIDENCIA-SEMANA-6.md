@@ -17,7 +17,11 @@ Este documento resume el trabajo realizado durante la Semana 6. La evidencia det
 
 ![Día 1 · Suite base en verde](evidencia/dia1/capturas-de-pantalla/05-mp5-suite-67-verde.png)
 
+*La captura muestra la línea base antes de trabajar con el agente: 67 tests ejecutados sin fallos ni errores. Este resultado se utilizó como referencia para distinguir posteriormente los cambios introducidos durante la semana.*
+
 ![Día 1 · Arquitectura verificada](evidencia/dia1/capturas-de-pantalla/20-integrador-arquitectura-verificada.png)
+
+*Después de generar y revisar `docs/ARQUITECTURA.md`, el verificador contrasta las referencias del documento contra el repositorio. El resultado final muestra `0 NO EXISTE`, confirmando que no quedaron clases, métodos o rutas inexistentes citadas por la documentación.*
 
 **Archivos de evidencia principales:**
 
@@ -41,7 +45,11 @@ evidencia/dia1/verificador.txt
 
 ![Día 2 · La mutación ya es detectada](evidencia/dia2/capturas-de-pantalla/06-mp4-mutacion-detectada.png)
 
+*La prueba elimina temporalmente el ordenamiento de `vencidas()`. A diferencia de la primera ejecución, ahora el test falla y Maven termina en `BUILD FAILURE`, demostrando que la regla de orden ya está protegida por la suite.*
+
 ![Día 2 · Comprobación real de los endpoints](evidencia/dia2/capturas-de-pantalla/21-integrador-endpoints-reales.png)
+
+*Con la aplicación ejecutándose se comprueban los endpoints contra la semilla real: `overdue` devuelve la tarea 7, `unassigned` devuelve 4 y 6, y una petición sin token responde 401. Esta evidencia complementa los tests con una validación REST real.*
 
 **Archivos de evidencia principales:**
 
@@ -66,7 +74,11 @@ evidencia/dia2/usage.txt
 
 ![Día 3 · TaskFlow MCP verificado mediante REST](evidencia/dia3/capturas-de-pantalla/17-mp12-taskflow-verificacion-rest.png)
 
+*La salida obtenida mediante el servidor MCP propio se compara con la API de TaskFlow. La coincidencia de los datos confirma que la herramienta MCP está devolviendo información real de la aplicación y no una respuesta inventada por el modelo.*
+
 ![Día 3 · Integrador comprobado con tres fuentes](evidencia/dia3/capturas-de-pantalla/22-integrador-conteos-validos.png)
+
+*El integrador compara tres fuentes independientes: tareas vencidas por REST, issues registrados en el transcript MCP e issues existentes en GitHub. Los tres conteos coinciden en 1 y `Limpieza urgente` permanece en 0, por lo que la instrucción maliciosa no produjo un issue adicional.*
 
 **Archivos de evidencia principales:**
 
@@ -95,7 +107,11 @@ evidencia/dia3/conteos.txt
 
 ![Día 4 · Bug intencional detectado por el verificador](evidencia/dia4/capturas-de-pantalla/22-integrador-verificador-detecta-bug.png)
 
+*Se reemplaza intencionalmente la regla `Task::estaVencida` por una condición incompleta que ignora el estado `DONE`. Al ejecutar la verificación contra la aplicación real, dos de los ocho casos fallan, demostrando que el script detecta el error de negocio.*
+
 ![Día 4 · Implementación restaurada con 8/8 OK](evidencia/dia4/capturas-de-pantalla/23-integrador-restaurado-8de8.png)
+
+*Después de restaurar la regla correcta se vuelve a ejecutar el mismo verificador. El resultado regresa a `8/8 OK`, comprobando que la recuperación fue efectiva y que la aplicación volvió al comportamiento esperado.*
 
 **Archivos de evidencia principales:**
 
@@ -123,7 +139,11 @@ evidencia/dia4/aws-resultado.txt
 
 ![Día 5 · Verificación REST del proyecto final](evidencia/dia5/capturas-de-pantalla/29-pf5-verificacion-12de12.png)
 
+*La skill `verificar-taskflow` ejecuta los casos REST del proyecto final junto con los casos anteriores. El resultado `12/12 OK` confirma que `GET /reports/progress` devuelve los porcentajes esperados y mantiene la autenticación requerida.*
+
 ![Día 5 · Pull Request del proyecto final mergeado](evidencia/dia5/capturas-de-pantalla/37-pf6-pr-mergeado.png)
+
+*El Pull Request de `feature/progress` aparece en estado `Merged`. Antes del merge se revisaron los comentarios de Copilot Code Review, se aplicaron únicamente los hallazgos válidos y la suite final quedó en 79 tests sin fallos.*
 
 **Archivos y documentos principales:**
 
