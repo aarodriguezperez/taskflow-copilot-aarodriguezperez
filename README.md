@@ -1,210 +1,197 @@
-# `taskflow-api` — la API REST completa
+# TaskFlow · GitHub Copilot · Semana 6
 
-El proyecto grande del curso, en su estado final (**v3.0**). A diferencia del resto del
-repositorio —donde cada carpeta aísla **un** concepto— aquí conviven todos a la vez, que es
-como se los va a encontrar en un trabajo: REST, DTOs, validación, JPA, seguridad con JWT,
-manejo centralizado de errores, tests en tres niveles y un contenedor.
+Repositorio de trabajo de la **Semana 6 de la Academia Backend / QE**, enfocado en el uso de **GitHub Copilot** dentro de un proyecto Java existente.
 
-## Qué resuelve
+Durante la semana se trabajó con GitHub Copilot CLI, VS Code, instrucciones de repositorio, skills, agentes personalizados, Model Context Protocol (MCP), revisión de código y un proyecto final integrado mediante Pull Request.
 
-**Nodo Digital**, una agencia de software de ~15 personas, coordinaba sus proyectos entre un
-grupo de WhatsApp y un Google Sheets. Cuatro dolores concretos: nadie sabía quién tenía qué;
-«ya está» no significaba nada porque nadie firmaba; el Sheets lo editaba cualquiera (un viernes
-alguien borró la pestaña de otro squad); y las fechas se perdían en el chat.
+---
 
-TaskFlow es la API que ordena eso: proyectos con tareas, cada tarea con un responsable, un
-estado y una fecha; nadie entra sin identificarse y nadie borra el proyecto de otro.
+## Alumno
 
-**Esto importa para leer el código:** cada regla de negocio de abajo nació de uno de esos cuatro
-dolores. No son validaciones decorativas.
+**Alberto Alejandro Rodríguez Pérez**  
+GitHub: [@aarodriguezperez](https://github.com/aarodriguezperez)
 
-## Los datos con los que arranca
+---
 
-Con la base vacía, `DataSeeder` crea tres usuarios y tres proyectos. No son relleno: son el
-reparto de la historia.
+## Evidencia principal
 
-| Usuario | Password | Rol | Es dueño de | Sirve para ver |
-|---|---|---|---|---|
-| `ana` | `ana123` | `USER` | Plataforma TaskFlow, Migración Legacy | El camino feliz |
-| `luis` | `luis123` | `USER` | App Móvil | **El 403**: tiene proyecto propio y aun así no puede borrar el de Ana |
-| `admin` | `admin123` | `ADMIN` | — | La excepción: pasa por encima de la regla de dueño |
+El reporte general de la semana se encuentra en:
 
-## Los endpoints
+### [EVIDENCIA-SEMANA-6.md](EVIDENCIA-SEMANA-6.md)
 
-| Método | Ruta | Notas |
+Este documento resume los cinco días e incluye:
+
+- qué se construyó;
+- dónde se encuentra en el repositorio;
+- cómo se comprobó;
+- qué problemas aparecieron y cómo se resolvieron;
+- capturas representativas;
+- referencias a evidencia reproducible.
+
+---
+
+## Proyecto final
+
+La feature elegida para el proyecto final fue:
+
+```text
+GET /reports/progress
+```
+
+El endpoint devuelve el avance de cada proyecto a partir del porcentaje de tareas en estado `DONE`.
+
+### Resultado final
+
+- Pull Request: [#5 · feat: progress (proyecto final)](https://github.com/aarodriguezperez/taskflow-copilot-aarodriguezperez/pull/5)
+- Verificación REST: `12/12 OK`
+- Suite final: `79 tests`
+- Failures: `0`
+- Errors: `0`
+- Estado del PR: `Merged`
+
+La documentación específica del proyecto final se encuentra en:
+
+### [semana6/README.md](semana6/README.md)
+
+---
+
+## Trabajo realizado
+
+| Día | Tema principal | Resultado |
 |---|---|---|
-| `POST` | `/auth/register` · `/auth/login` | Público. El login devuelve el JWT |
-| `GET` | `/auth/me` | Quién soy, según el token |
-| `GET` `POST` | `/projects` | Listar y crear |
-| `GET` `PUT` `DELETE` | `/projects/{id}` | El `DELETE` solo lo puede el dueño o un `ADMIN` |
-| `GET` `POST` | `/projects/{id}/tasks` | Las tareas de un proyecto. Una tarea **nace** dentro de su proyecto |
-| `GET` | `/tasks` · `/tasks/{id}` | `/tasks?status=DONE` filtra |
-| `PUT` `DELETE` | `/tasks/{id}` | Actualizar completa / borrar |
-| `PATCH` | `/tasks/{id}/status` | Cambiar solo el estado |
-| `GET` | `/info` | Público: nombre y versión. Es el smoke test de un despliegue |
+| Día 1 | GitHub Copilot CLI | Configuración del repositorio, instrucciones y documentación de arquitectura |
+| Día 2 | Especificar, implementar y revisar | `GET /tasks/overdue` y `GET /tasks/unassigned` |
+| Día 3 | Model Context Protocol | Servidor MCP propio de TaskFlow, GitHub MCP, AWS Knowledge y Playwright |
+| Día 4 | Skills y agentes | Skills reutilizables, agentes `revisor` y `tester`, `GET /projects/{id}/summary` |
+| Día 5 | VS Code y proyecto final | MCP en VS Code y `GET /reports/progress` |
 
-Documentación viva en `http://localhost:8080/swagger-ui/index.html`.
-Colección de Postman lista para importar en [`postman/`](postman/).
+---
 
-## Las reglas, y el código HTTP que verías al romperlas
+## Documentación paso a paso
 
-La tabla que vale la pena saberse: **cada regla vive en un lugar concreto**, y ese lugar es una
-decisión de diseño, no un accidente.
+El recorrido detallado de cada día se conserva en:
 
-| Regla | Dónde vive | Rompela y ves |
-|---|---|---|
-| Una tarea no existe sin proyecto | Constructor de `Task` + el `projectId` sale del path | `400` |
-| `title` entre 3 y 120 caracteres | Constructor de `Task` → `TaskValidationException` | `400` |
-| `dueDate` no puede ser pasada **al crear** | Factory `Task.crear` — el constructor sí rehidrata tareas vencidas, o `estaVencida()` no tendría sentido | `400` |
-| No se pasa a `DONE` sin responsable | `Task.setStatus` — la regla vive en el **dominio**; `TaskService` la traduce | `422` |
-| Solo el dueño o `ADMIN` borra un proyecto | `@PreAuthorize` + el bean `ProjectSecurity` | `403` |
-| Nadie entra sin identificarse | Filtro JWT | `401` |
-| Una tarea que no existe se dice claro | `TaskNotFoundException` → el `@RestControllerAdvice` | `404` |
+- [Día 1 · GitHub Copilot CLI](docs/dia1.md)
+- [Día 2 · Especificar, implementar y revisar](docs/dia2.md)
+- [Día 3 · MCP](docs/dia3.md)
+- [Día 4 · Skills y agentes](docs/dia4.md)
+- [Día 5 · VS Code y proyecto final](docs/dia5.md)
 
-Ojo a la distinción **401 vs 403**: sin token es `401` («no sé quién eres»); con token válido
-pero sin permiso es `403` («sé quién eres, y no puedes»). Que salgan los dos códigos correctos
-depende de que `SecurityConfig` declare **ambos**, `authenticationEntryPoint` y
-`accessDeniedHandler` — con uno solo, todo cae en `401` y la diferencia se pierde.
+La documentación de arquitectura generada y posteriormente verificada se encuentra en:
 
-## Cómo levantarlo — lo único que necesitas es Docker
+- [Arquitectura de TaskFlow](docs/ARQUITECTURA.md)
 
-Basta con **Docker Desktop actual** (o Docker Engine con el plugin Compose v2). No instalas nada
-más: **ni JDK, ni Maven, ni Postgres, ni un IDE.** El `Dockerfile` es multi-etapa y trae lo suyo:
+---
 
-| Etapa | Imagen | Qué aporta |
-|---|---|---|
-| `build` | `maven:3.9-eclipse-temurin-21` | Compila y empaqueta **dentro** del contenedor |
-| runtime | `eclipse-temurin:21-jre` | Solo el JRE 21 y el jar — ni Maven ni el JDK viajan a la imagen final |
+## Evidencia
 
-Y no hay nada que configurar: el `docker-compose.yml` trae valores por defecto para usuario,
-contraseña, base y secret. Se arranca tal cual sale del clon.
+La evidencia técnica y las capturas están organizadas por día:
 
-### Antes de empezar, una comprobación de 5 segundos
-
-```bash
-docker compose version      # tiene que responder v2.x o superior
+```text
+evidencia/
+├── dia1/
+├── dia2/
+├── dia3/
+├── dia4/
+└── dia5/
 ```
 
-Si ese comando no existe y en tu máquina solo hay `docker-compose` (con guion, el antiguo), hay
-que actualizar Docker Desktop antes de seguir. **Este `docker-compose.yml` está escrito en formato
-Compose v2** —por eso no declara `version:`— y el Compose v1 no sabe leerlo: lo interpreta como el
-formato viejo y falla con errores de opciones no soportadas que no dicen cuál es la causa real.
-Cualquier Docker Desktop de los últimos años ya trae la v2.
+Cada carpeta contiene archivos que permiten comprobar los resultados sin depender únicamente de la respuesta del modelo.
 
-### Los tres pasos
+Entre ellos se encuentran:
 
-```bash
-git clone https://github.com/cursosmrugerio/academyMty.git
-cd academyMty/taskflow-api
-docker compose up --build
+- resultados de tests;
+- verificaciones REST;
+- transcripts;
+- revisiones;
+- resultados de scripts;
+- conteos;
+- capturas de pantalla.
+
+---
+
+## Componentes principales
+
+```text
+.github/
+├── copilot-instructions.md
+├── agents/
+│   ├── revisor.agent.md
+│   └── tester.agent.md
+└── skills/
+    ├── crear-endpoint-taskflow/
+    └── verificar-taskflow/
+
+docs/
+├── ARQUITECTURA.md
+├── dia1.md
+├── dia2.md
+├── dia3.md
+├── dia4.md
+└── dia5.md
+
+evidencia/
+├── dia1/
+├── dia2/
+├── dia3/
+├── dia4/
+└── dia5/
+
+issues/
+└── summary.md
+
+specs/
+├── overdue.md
+├── unassigned.md
+├── summary.md
+└── progress.md
+
+taskflow-mcp/
+└── servidor MCP de TaskFlow en Java
+
+semana6/
+├── README.md
+├── code-review.md
+├── proyecto-final.diff
+├── revision.md
+└── sesion-implementacion.md
 ```
 
-Eso es todo. En Windows funciona igual, en PowerShell o en `cmd`.
+---
 
-### Qué acabas de levantar
+## Principales aprendizajes
 
-| Contenedor | Qué es | Dónde queda |
-|---|---|---|
-| `db` | PostgreSQL 16 con su volumen propio | `localhost:5432` (solo para inspeccionar con psql o DBeaver) |
-| `api` | La API con el perfil `docker`, contra ese Postgres | `http://localhost:8080` |
+Durante la semana se aplicó un flujo de trabajo en el que GitHub Copilot se utilizó como herramienta de apoyo, manteniendo la verificación y la decisión final del lado del desarrollador.
 
-La API arranca con la base sembrada: los usuarios `ana` / `ana123`, `luis` / `luis123` y
-`admin` / `admin123`, y los tres proyectos de la agencia.
+Entre los principales aprendizajes estuvieron:
 
-El `depends_on` espera al **healthcheck** de la base, no solo a que el contenedor arranque. La
-diferencia entre eso y un `depends_on` pelado es una API que se cae al iniciar porque Postgres
-todavía no aceptaba conexiones.
+- especificar el comportamiento antes de pedir una implementación;
+- revisar el alcance real de los cambios del agente;
+- comprobar que un test falle cuando desaparece la regla que pretende proteger;
+- utilizar permisos mínimos para ejecutar herramientas;
+- diferenciar datos externos de instrucciones confiables;
+- auditar transcripts cuando se utilizan servidores MCP;
+- separar responsabilidades mediante skills y agentes personalizados;
+- comprobar el comportamiento real mediante REST además de los tests;
+- revisar cada sugerencia de Code Review antes de aplicarla.
 
-### Comprobar que está vivo
+---
 
-```bash
-curl http://localhost:8080/info
-# {"app":"taskflow-api","version":"3.0.0"}
-```
+## Estado final
 
-O abre `http://localhost:8080/swagger-ui/index.html`, entra con `ana` / `ana123` en
-`POST /auth/login`, y pega el token en el botón **Authorize**.
+Al finalizar la semana:
 
-### Pararlo
+- las features desarrolladas quedaron integradas a `main`;
+- el proyecto final `GET /reports/progress` quedó mergeado mediante el PR `#5`;
+- la suite final quedó en `79 tests` con `0` fallos;
+- la verificación REST del proyecto final terminó en `12/12 OK`;
+- la evidencia de los cinco días quedó organizada dentro de `evidencia/`;
+- la documentación detallada quedó disponible dentro de `docs/`;
+- el reporte principal de la semana quedó en `EVIDENCIA-SEMANA-6.md`.
 
-```bash
-docker compose down       # para los contenedores, conserva los datos
-docker compose down -v    # además borra el volumen: la próxima vez arranca de cero
-```
+---
 
-### Lo único que puede salirte mal
+## Repositorio
 
-| Síntoma | Qué pasa |
-|---|---|
-| `Cannot connect to the Docker daemon` | Docker no está corriendo. Abre Docker Desktop y espera a que esté en verde |
-| Errores de sintaxis u «opción no soportada» al leer el `docker-compose.yml` | Estás con Compose **v1** (`docker-compose`, con guion). Comprueba con `docker compose version` y actualiza Docker Desktop |
-| `port is already allocated` | Algo más ocupa el **8080** o el **5432**. Libéralo, o cambia el lado izquierdo del `ports:` en el compose (`"8081:8080"`) |
-| La primera vez tarda mucho | Normal: la etapa de build descarga todo el árbol de dependencias de Spring dentro del contenedor, y necesita internet. Mientras no toques el `pom.xml`, esa capa queda en caché y las siguientes son segundos |
-
-### Si quieres cambiar la configuración (opcional)
-
-Los valores por defecto son de desarrollo y están a la vista en el compose. Para cambiarlos, sin
-tocar ningún archivo versionado:
-
-```bash
-cp .env.example .env      # copy .env.example .env  en Windows
-```
-
-y edita ahí `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` y `JWT_SECRET`. El `.env` no se
-commitea nunca. **Fuera de tu máquina, el `JWT_SECRET` se cambia sí o sí**: el que viene por
-defecto es público, está en este repositorio, y con él cualquiera puede firmar un token válido.
-
-### Dos cosas que no tienes que revisar
-
-**Intel o ARM, da igual.** Las tres imágenes base publican `amd64` y `arm64`, y como el compose
-construye **en cada máquina**, cada una genera la suya nativa. Un Mac con Apple Silicon y un PC
-con Windows corren el mismo comando sin tocar una línea.
-
-**Los finales de línea, tampoco.** Git para Windows los convierte al clonar, y un `\r` colado en
-el `.env` entra *dentro* del valor: `JWT_SECRET=abc\r` firma con `abc\r`, la API arranca tan
-tranquila y todo login devuelve `401` sin decir por qué. El `.gitattributes` de esta carpeta
-fuerza LF, así que no puede pasar.
-
-## Otras formas de correrlo, si vas a tocar el código
-
-Estas sí necesitan JDK 21 y Maven en tu máquina, y no usan Postgres: el perfil por defecto
-levanta una **H2 en archivo** (`data/taskflow.mv.db`), así que los datos sobreviven al reinicio.
-Consola SQL en `/h2-console`.
-
-| Desde | Cómo |
-|---|---|
-| Eclipse | Importar como proyecto Maven y ejecutar `TaskflowApiApplication` como Java Application |
-| Terminal | `mvn spring-boot:run` |
-
-## Los tests
-
-| Comando | Qué corre |
-|---|---|
-| `mvn test` | **67 tests**: unitarios, slices (`@WebMvcTest`, `@DataJpaTest`) e integración (`@SpringBootTest`) |
-| `mvn verify` | Los 67 **+ el gate de cobertura**: falla por debajo del 70% de líneas. Hoy va en 86.7% |
-| `mvn test -Ddocker.tests=true` | **70**: añade `TaskRepositoryPostgresIT`, el mismo test de repositorio contra un Postgres 16 real y efímero (Testcontainers). Requiere Docker levantado |
-
-Informe de cobertura tras `mvn verify`: `target/site/jacoco/index.html`.
-
-### Dos trampas que ya están resueltas aquí
-
-**JaCoCo vive en un perfil, no en `<build>`.** Instrumenta con un `-javaagent` que inyecta en
-`${argLine}`, y m2e no ejecuta `prepare-agent`: dentro de Eclipse la variable se queda sin
-resolver y **`Run As > JUnit Test` revienta**. El perfil `cobertura` se activa con
-`!m2e.version`, o sea en la terminal y no en Eclipse. Es el mismo patrón que usa el proyecto
-[`mockito`](../mockito/) de este repositorio, por la misma razón.
-
-**El test de Testcontainers fija `api.version=1.41`.** Sin eso, el cliente `docker-java` que
-arrastra Spring Boot 3.5 negocia por debajo de la API mínima de Docker moderno (Min API 1.40) y
-falla con «*Could not find a valid Docker environment*» — un mensaje que no menciona versiones
-y te manda a revisar si el demonio está encendido, que no era el problema.
-
-## Qué NO está aquí, a propósito
-
-- **Nada de AWS**: ni despliegue en EC2/RDS, ni las evidencias, ni el plan sin cuenta de nube.
-- **Nada de CI/CD**: el pipeline de GitHub Actions y la publicación de la imagen no viajaron.
-- **Ninguna feature nueva**: comentarios en tareas, etiquetas y notificaciones son el backlog
-  del cliente, no parte de v3.0.
-- **Sin frontend**: TaskFlow es una API. Si algún día se le sirve una UI estática desde
-  `src/main/resources/static/`, hay que abrirla en `SecurityConfig` — con el `anyRequest()
-  .authenticated()` actual, hasta el CSS responde `401`.
+**GitHub:**  
+https://github.com/aarodriguezperez/taskflow-copilot-aarodriguezperez
